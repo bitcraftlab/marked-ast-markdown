@@ -18,7 +18,7 @@ function getUrl(node) {
 
 var generators = {
   heading: function(node) {
-    return times(node.level).map(createChar('#')).join('') + ' ' + node.text.map(writeNode).join(' ') + '\n\n';
+    return times(node.level).map(createChar('#')).join('') + ' ' + node.text.map(writeNode).join(' ') + '\n';
   },
 
   paragraph: function(node) {
@@ -36,11 +36,13 @@ var generators = {
   link: function(node) {
     var href = getUrl(node);
 
+    /*
     if (typeof node.text == 'string' || (node.text instanceof String)) {
       return '<' + href + '>';
     }
+    */
 
-    return '[' + node.text.map(writeNode).join('') + '](' + href + ')';
+    return '[' + node.text + '](' + href + ')';
   },
 
   image: function(node) {
@@ -52,14 +54,14 @@ var generators = {
   list: function (node, index, ast) {
     return (function list(node, ind) {
       return node.body.map(function (item, c) {
-        var charPrefix = node.ordered ? ((c+1) + '. ') : '* ';
+        var charPrefix = node.ordered ? ((c+1) + '. ') : '- ';
         return '\n' + ind + charPrefix + item.text.map(function (node) {
           if (typeof node === 'string') { return node; }
           if (node.type !== 'list') { return writeNode(node); }
           return list(node, ind + '  ');
         }).join('')
       }).join('')
-    })(node, '').slice(1) + ((index !== ast.length-1) ? '\n\n\n' : '');
+    })(node, '').slice(1) + ((index !== ast.length-1) ? '\n\n' : '');
   },
 
   blockquote: function(node) {
@@ -67,7 +69,7 @@ var generators = {
   },
 
   code: function(node) {
-    return '```' + (node.lang || '') + '\n' + node.code + '\n' + '```' + '\n\n';
+    return '    ' + node.code.split('\n').join('\n    ')  + '\n\n';
   },
 
   codespan: function (node) {
@@ -142,5 +144,5 @@ function writeTableHeaderLine(node) {
 }
 
 module.exports = function(ast) {
-  return ast.map(writeNode).join('');
+  return ast.map(writeNode).join('') + '\n';
 };
